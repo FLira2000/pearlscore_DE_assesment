@@ -1,0 +1,10 @@
+# Optional: only needed to run Airflow locally.
+# CANDIDATE_BRIEF §5 accepts DAG Python files alone; SMTP email callbacks
+# are configured in the DAG / Airflow connection, not as extra pip packages
+# beyond apache-airflow.
+#
+# Prefer Airflow's constraint file for your Python version, e.g.:
+#   pip install "apache-airflow==2.10.5" \
+#     --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.10.5/constraints-3.12.txt"
+#
+apache-airflow>=2.8,<3
