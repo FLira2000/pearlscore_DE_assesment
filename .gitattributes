@@ -1,0 +1,12 @@
+# Keep shell/Python/SQL as LF so scripts run on macOS/Linux (and in Docker).
+*.sh text eol=lf
+*.py text eol=lf
+*.sql text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.md text eol=lf
+Dockerfile text eol=lf
+.dockerignore text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf

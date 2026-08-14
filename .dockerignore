@@ -1,0 +1,8 @@
+.venv
+.git
+nordstack_analytics/target
+nordstack_analytics/dbt_packages
+nordstack_analytics/logs
+**/__pycache__
+.dlt
+*.pyc

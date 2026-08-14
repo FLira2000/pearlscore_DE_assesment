@@ -1,0 +1,83 @@
+# --- Python ---
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+.Python
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# --- Environment / secrets ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# --- dlt (CANDIDATE_BRIEF §0) ---
+.dlt/secrets.toml
+secrets.toml
+# local pipeline state / load packages (regenerated on run)
+**/_dlt_pipeline_state/
+**/_storage/
+**/.dlt_storage/
+
+# --- dbt (CANDIDATE_BRIEF §2–§4) ---
+target/
+dbt_packages/
+logs/
+# compiled / run artifacts sometimes left at project root
+**/compiled/
+**/run/
+# dbt anonymous user id (local)
+**/.user.yml
+
+# --- Airflow (CANDIDATE_BRIEF §5) ---
+# generated local home / `airflow standalone`
+airflow.cfg
+unittests.cfg
+webserver_config.py
+airflow.db
+airflow.db-journal
+standalone_admin_password.txt
+simple_auth_manager_passwords.json.generated
+# pids
+*.pid
+airflow-webserver.pid
+airflow-scheduler.pid
+airflow-triggerer.pid
+# task / scheduler logs (compose volume + accidental host dumps)
+airflow/logs/
+logs/dag_id=*
+logs/scheduler/
+logs/dag_processor_manager/
+logs/dag_processor/
+# compiled DAG pyc
+dags/__pycache__/
+
+# --- Docker / local data ---
+pgdata/
+mysql_data/
+mysqldata/
+*.sql.gz
+
+# --- IDE / OS ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
