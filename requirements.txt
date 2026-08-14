@@ -1,0 +1,22 @@
+# NordStack DE assessment — Python deps mapped from CANDIDATE_BRIEF.md
+# Requires Python >= 3.10 (dlt). Use the project .venv:
+#   python3.12 -m venv .venv
+#   source .venv/bin/activate
+#   pip install -U pip
+#   pip install -r requirements.txt
+#
+# dbt packages (e.g. dbt_utils) belong in packages.yml, not here.
+# Airflow: see requirements-airflow.txt (DAG .py files are enough per brief §5).
+
+# --- §0 dlt: sync MySQL → PostgreSQL ---
+# https://dlthub.com/docs/tutorial/sql-database
+dlt[postgres,sql_database]>=1.4,<2
+PyMySQL>=1.1,<2
+
+# --- §1 seed / load helpers (MySQL bootstrap from CSVs; local profiling) ---
+pandas>=2.2,<3
+SQLAlchemy>=2.0,<3
+
+# --- §2–§4 dbt analytics layer on Postgres ---
+dbt-core>=1.8,<1.10
+dbt-postgres>=1.8,<1.10

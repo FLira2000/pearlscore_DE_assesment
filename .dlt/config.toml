@@ -1,0 +1,8 @@
+[runtime]
+log_level = "INFO"
+
+[sources.sql_database]
+schema = "billing"
+
+[destination.postgres]
+# Tables land in dataset/schema `raw` (set on the pipeline)
