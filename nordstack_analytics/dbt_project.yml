@@ -1,0 +1,38 @@
+name: nordstack_analytics
+version: 1.0.0
+config-version: 2
+# Profile `nordstack` → Postgres 16 localhost:5432 / analytics (CANDIDATE_BRIEF)
+profile: nordstack
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - target
+  - dbt_packages
+  - logs
+
+models:
+  nordstack_analytics:
+    +on_schema_change: "sync_all_columns"
+    staging:
+      +schema: staging
+      +materialized: view
+      +tags: ["staging"]
+    quarantine:
+      +schema: quarantine
+      +materialized: view
+      +tags: ["quarantine"]
+    marts:
+      +schema: marts
+      +materialized: table
+      +tags: ["marts"]
+
+vars:
+  # Reporting currency for paid revenue / MRR (SEK → EUR hardcoded FX).
+  reporting_currency: "EUR"
+  sek_to_eur_rate: 0.087  # illustrative fixed rate; document in README

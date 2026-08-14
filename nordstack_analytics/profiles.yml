@@ -1,0 +1,17 @@
+# Warehouse from CANDIDATE_BRIEF.md:
+# Postgres 16 @ localhost:5432, db analytics, user dbt_user
+# DBT_HOST=postgres when running inside docker-compose Airflow.
+nordstack:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('DBT_HOST', '127.0.0.1') }}"
+      port: "{{ env_var('DBT_PORT', '5432') | int }}"
+      user: dbt_user
+      password: dbt_password
+      dbname: analytics
+      schema: analytics
+      threads: 4
+      keepalives_idle: 0
+      connect_timeout: 10

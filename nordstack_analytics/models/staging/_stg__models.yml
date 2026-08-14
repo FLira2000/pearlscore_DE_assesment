@@ -1,0 +1,105 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: >
+      Deduped customers. Invalid email / missing country / future created_at
+      are flagged, not dropped, so LTV still has a grain of one row per customer.
+    columns:
+      - name: customer_id
+        description: Unique customer identifier after dedupe.
+        tests:
+          - unique
+          - not_null
+      - name: customer_name
+        tests:
+          - not_null
+      - name: email
+        tests:
+          - not_null
+      - name: country
+        description: ISO-like country code; UNKNOWN when source was null.
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['DE', 'NL', 'FR', 'ES', 'SE', 'IT', 'NO', 'PT', 'FI', 'PL', 'UNKNOWN']
+      - name: created_at
+        tests:
+          - not_null
+
+  - name: stg_subscriptions
+    description: >
+      Deduped subscriptions. Orphans and non-positive prices excluded (see quarantine).
+      Invalid date ranges kept and flagged; churn marts ignore them.
+    columns:
+      - name: subscription_id
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
+      - name: plan_name
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['starter', 'growth', 'scale']
+      - name: monthly_price
+        description: List price in source currency; always > 0 after quarantine.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: "> 0"
+      - name: status
+        description: Normalized (trim + lower) subscription status.
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['active', 'cancelled', 'paused']
+      - name: start_date
+        tests:
+          - not_null
+
+  - name: stg_invoices
+    description: >
+      Typed invoices in EUR. Orphans and non-positive amounts excluded.
+      SEK converted with var sek_to_eur_rate. Invoices after end_date flagged
+      for marts to drop from MRR/LTV.
+    columns:
+      - name: invoice_id
+        tests:
+          - unique
+          - not_null
+      - name: subscription_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_subscriptions')
+              field: subscription_id
+      - name: invoice_date
+        tests:
+          - not_null
+      - name: amount_eur
+        description: Amount in reporting currency (EUR).
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: "> 0"
+      - name: status
+        description: Normalized invoice status (trim + lower).
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['paid', 'failed', 'open']
+      - name: reporting_currency
+        tests:
+          - accepted_values:
+              values: ['EUR']
+      - name: plan_name
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['starter', 'growth', 'scale']

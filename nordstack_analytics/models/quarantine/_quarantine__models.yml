@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: qrt_customers
+    description: Customers rejected or flagged (duplicate id, invalid email, missing country).
+    columns:
+      - name: customer_id
+        tests: [not_null]
+      - name: quarantine_reason
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['duplicate_customer_id', 'invalid_email', 'missing_country', 'other']
+
+  - name: qrt_subscriptions
+    description: Subscriptions rejected (duplicate, orphan FK, non-positive price, end before start).
+    columns:
+      - name: subscription_id
+        tests: [not_null]
+      - name: quarantine_reason
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - duplicate_subscription_id
+                - orphan_customer_id
+                - non_positive_monthly_price
+                - end_before_start
+                - other
+
+  - name: qrt_invoices
+    description: Invoices rejected (orphan FK, null/negative amount, unsupported currency, billed after end).
+    columns:
+      - name: invoice_id
+        tests: [not_null]
+      - name: quarantine_reason
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - orphan_subscription_id
+                - null_amount
+                - non_positive_amount
+                - unsupported_currency
+                - invoice_after_end_date
+                - other

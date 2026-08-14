@@ -1,0 +1,82 @@
+version: 2
+
+models:
+  - name: fct_mrr_monthly
+    description: >
+      Monthly Recurring Revenue proxy: sum of paid invoice amounts in EUR,
+      by invoice month and plan. SEK converted in staging at var sek_to_eur_rate
+      (0.087). Invoices after subscription end_date are excluded.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [invoice_month, plan_name]
+    columns:
+      - name: invoice_month
+        description: First calendar day of the invoice month.
+        tests: [not_null]
+      - name: plan_name
+        description: Subscription plan billed that month (starter / growth / scale).
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['starter', 'growth', 'scale']
+      - name: paid_invoice_count
+        description: Number of paid invoices contributing to mrr_eur.
+        tests: [not_null]
+      - name: mrr_eur
+        description: Sum of paid amounts in EUR for the month and plan.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+
+  - name: fct_customer_ltv
+    description: >
+      Customer lifetime value to date: total paid EUR, country, distinct plan mix,
+      and current subscription status flags. One row per cleaned customer.
+    columns:
+      - name: customer_id
+        description: Customer identifier (staging grain).
+        tests: [unique, not_null]
+      - name: customer_name
+        description: Display name from billing export.
+        tests: [not_null]
+      - name: country
+        description: Country code (UNKNOWN if source was null).
+        tests: [not_null]
+      - name: ltv_eur
+        description: Sum of paid invoice amounts in EUR to date (0 if none).
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+      - name: paid_invoice_count
+        description: Count of paid invoices included in LTV.
+        tests: [not_null]
+      - name: plan_mix
+        description: Distinct plans the customer has paid for, comma-separated.
+      - name: subscription_statuses
+        description: Distinct current subscription statuses for the customer.
+      - name: has_active_subscription
+        description: True if the customer has at least one active subscription.
+        tests: [not_null]
+
+  - name: fct_churn_monthly
+    description: >
+      Subscriptions cancelled in each month and list-price MRR lost (EUR assumed).
+      Excludes invalid date ranges and non-positive prices.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [churn_month]
+    columns:
+      - name: churn_month
+        description: First calendar day of the month of end_date.
+        tests: [not_null]
+      - name: cancelled_subscriptions
+        description: Count of cancelled subscriptions in that month.
+        tests: [not_null]
+      - name: mrr_lost_eur
+        description: Sum of monthly_price for those cancellations.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"

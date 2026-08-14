@@ -1,0 +1,61 @@
+version: 2
+
+sources:
+  - name: billing_raw
+    description: >
+      Raw billing exports loaded by dlt from MySQL `billing` into Postgres
+      `analytics.raw` (localhost:5432). Intentionally unclean. Tests below
+      *catch* planted issues at warn severity so `dbt build` stays green
+      after staging/quarantine handle them.
+    database: analytics
+    schema: raw
+    tags: ["raw"]
+    tables:
+      - name: raw_customers
+        description: One row per customer (duplicate C0023, bad email, null country planted).
+        columns:
+          - name: customer_id
+            tests:
+              - not_null
+              - unique:
+                  config:
+                    severity: warn
+                    store_failures: true
+          - name: email
+            tests:
+              - not_null
+      - name: raw_subscriptions
+        description: One row per subscription (duplicate S00006, orphan C9999, negative price planted).
+        columns:
+          - name: subscription_id
+            tests:
+              - not_null
+              - unique:
+                  config:
+                    severity: warn
+                    store_failures: true
+          - name: customer_id
+            tests:
+              - not_null
+              - relationships:
+                  to: source('billing_raw', 'raw_customers')
+                  field: customer_id
+                  config:
+                    severity: warn
+                    store_failures: true
+      - name: raw_invoices
+        description: One row per monthly invoice (orphan S99999, null/negative amounts, SEK planted).
+        columns:
+          - name: invoice_id
+            tests:
+              - not_null
+              - unique
+          - name: subscription_id
+            tests:
+              - not_null
+              - relationships:
+                  to: source('billing_raw', 'raw_subscriptions')
+                  field: subscription_id
+                  config:
+                    severity: warn
+                    store_failures: true
